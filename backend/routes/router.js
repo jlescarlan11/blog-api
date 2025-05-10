@@ -18,15 +18,3 @@ router.get(
   authorize("ADMIN"),
   controller.dashboard
 );
-
-// router.get("/post", controller.getAllPost);
-// router.post("/post", authenticate, authorize("ADMIN"), controller.createPost);
-// router.put("/post:id", authenticate, authorize("ADMIN"), controller.updatePost);
-// router.delete(
-//   "/post/:id",
-//   authenticate,
-//   authorize("ADMIN"),
-//   controller.deletePost
-// );
-
-module.exports = router;

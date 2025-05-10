@@ -13,10 +13,10 @@ interface RouteProps {
 }
 
 const ProtectedRoute: React.FC<RouteProps> = ({ children }) =>
-  isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
+  isAuthenticated() ? <>{children}</> : <Navigate to="/login" />;
 
 const PublicRoute: React.FC<RouteProps> = ({ children }) =>
-  isAuthenticated() ? <Navigate to="/dashboard" replace /> : <>{children}</>;
+  isAuthenticated() ? <Navigate to="/" /> : <>{children}</>;
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -47,11 +47,7 @@ const App: React.FC = () => {
           <Route
             path="/"
             element={
-              isAuthenticated() ? (
-                <Navigate to="/dashboard" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
+              isAuthenticated() ? <Navigate to="/" /> : <Navigate to="/login" />
             }
           />
           <Route
@@ -64,7 +60,7 @@ const App: React.FC = () => {
           />
 
           <Route
-            path="/dashboard"
+            path="/"
             element={
               <ProtectedRoute>
                 <Dashboard />
