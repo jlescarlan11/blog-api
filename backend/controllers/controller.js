@@ -4,31 +4,39 @@ const query = require("../utils/query");
 
 // Helper to sign a JWT
 function generateToken(user) {
-  return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
-    expiresIn: "2d",
-  });
+  return jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "2d",
+    }
+  );
 }
 
 const controller = {
   signup: async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, inviteCode } = req.body;
 
     try {
       if (await query.user.getByEmail(email)) {
         return res.status(409).json({ message: "Email already exists." });
       }
 
+      const isAdmin = inviteCode === process.env.ADMIN_INVITE_CODE;
+
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await query.user.create(
         firstName,
         lastName,
         email,
-        hashedPassword
+        hashedPassword,
+        isAdmin
       );
 
       const token = generateToken({
         id: newUser.id,
         email: newUser.email,
+        role: newUser.role,
       });
 
       res.status(201).json({
@@ -38,6 +46,7 @@ const controller = {
           firstName: newUser.firstName,
           lastName: newUser.lastName,
           email: newUser.email,
+          role: newUser.role,
         },
       });
     } catch (err) {

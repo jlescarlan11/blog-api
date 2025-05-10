@@ -5,9 +5,15 @@ const prisma = new PrismaClient();
 // The query object with user operations
 module.exports = {
   user: {
-    create: async (firstName, lastName, email, password) => {
+    create: async (firstName, lastName, email, password, admin) => {
       return await prisma.user.create({
-        data: { firstName, lastName, email, password },
+        data: {
+          firstName,
+          lastName,
+          email,
+          password,
+          role: admin ? "ADMIN" : "USER",
+        },
       });
     },
     getByEmail: async (email) => {

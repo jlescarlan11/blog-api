@@ -4,11 +4,12 @@ module.exports = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // decoded should now contain at least an `id` property
-    const user = await query.user.getById(decoded.id);
-    if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+    };
     next();
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });
