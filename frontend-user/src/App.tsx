@@ -22,7 +22,7 @@ const ProtectedRoute: React.FC<RouteProps> = ({ children }) =>
   );
 
 const PublicRoute: React.FC<RouteProps> = ({ children }) =>
-  isAuthenticated() ? <Navigate to="/" replace /> : <>{children}</>;
+  isAuthenticated() ? <Navigate to="/" /> : <>{children}</>;
 
 const Layout: React.FC = () => {
   const location = useLocation();

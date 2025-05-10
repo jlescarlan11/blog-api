@@ -57,7 +57,7 @@ const Signup: React.FC = () => {
 
       const res = await axios.post(signupUrl, formData);
       login(res.data.token);
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       console.error(err);
       setError("Signup failed. Please try again.");
