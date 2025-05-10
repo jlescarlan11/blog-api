@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { login } from "../auth";
 import { useNavigate } from "react-router-dom";
-import { LuKeyRound, LuMail, LuNewspaper, LuUser } from "react-icons/lu";
+import { LuKeyRound, LuMail, LuUser } from "react-icons/lu";
 import { useSearchParams } from "react-router-dom";
 
 interface FormData {
@@ -57,7 +57,7 @@ const Signup: React.FC = () => {
 
       const res = await axios.post(signupUrl, formData);
       login(res.data.token);
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       console.error(err);
       setError("Signup failed. Please try again.");
@@ -67,11 +67,7 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-base-100 p-4">
-      <div className="text-4xl flex items-center mb-8 gap-4">
-        <LuNewspaper className="" />
-        <h1 className=" font-bold ">Sutta's Blog</h1>
-      </div>
+    <div className="flex flex-col flex-1 items-center bg-base-100 py-8 px-4">
       <form
         onSubmit={handleSubmit}
         className="card w-full max-w-md shadow-lg bg-base-200"

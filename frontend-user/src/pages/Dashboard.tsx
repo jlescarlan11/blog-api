@@ -1,5 +1,5 @@
 const Dashboard = () => {
-  return <div data-theme="valentine">Dashboard</div>;
+  return <div>Dashboard. To Fix</div>;
 };
 
 export default Dashboard;

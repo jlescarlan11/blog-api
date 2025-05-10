@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { login } from "../auth";
 import { useNavigate, Link } from "react-router-dom";
-import { LuKeyRound, LuMail } from "react-icons/lu";
+import { LuKeyRound, LuMail, LuNewspaper } from "react-icons/lu";
 
 interface FormData {
   email: string;
@@ -38,17 +38,32 @@ const LogIn: React.FC = () => {
 
       const res = await axios.post(loginUrl, formData);
       login(res.data.token);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      setError("Login failed. Please check your credentials and try again.");
+
+      // Modified error handling
+      if (axios.isAxiosError(err)) {
+        // Server responded with 4xx/5xx status
+        setError(err.response?.data?.error || "An unexpected error occurred");
+      } else if (err instanceof Error) {
+        // Other errors
+        setError(err.message);
+      } else {
+        // Unknown errors
+        setError("An unknown error occurred");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col flex-1 items-center bg-base-100 py-8 px-4">
+    <div className="min-h-screen flex flex-col items-center bg-base-100 py-8 px-4">
+      <div className="text-4xl flex items-center mb-8 gap-4">
+        <LuNewspaper className="" />
+        <h1 className="font-bold">Sutta's Blog</h1>
+      </div>
       <form
         onSubmit={handleSubmit}
         className="card w-full max-w-md shadow-lg bg-base-200"
@@ -118,14 +133,15 @@ const LogIn: React.FC = () => {
             )}
           </button>
 
-          <div className="divider my-8">OR</div>
+          <div className="divider my-8"></div>
 
           <div className="text-center">
             <p className="text-sm">
-              Don't have an account?{" "}
+              Admin access only. Regular users should use the{" "}
               <Link to="/signup" className="link link-primary font-semibold">
-                Sign up here
+                main site login
               </Link>
+              {""}.
             </p>
           </div>
         </div>

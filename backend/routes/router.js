@@ -10,14 +10,11 @@ router.get("/", (req, res) => {
 });
 router.post("/api/auth/signup", controller.signup);
 router.post("/api/auth/login", controller.login);
-// router.get("/post", controller.getAllPost);
-// router.post("/post", authenticate, authorize("ADMIN"), controller.createPost);
-// router.put("/post:id", authenticate, authorize("ADMIN"), controller.updatePost);
-// router.delete(
-//   "/post/:id",
-//   authenticate,
-//   authorize("ADMIN"),
-//   controller.deletePost
-// );
 
-module.exports = router;
+router.post("/api/admin/login", controller.adminLogin);
+router.get(
+  "/api/admin/data",
+  authenticate,
+  authorize("ADMIN"),
+  controller.dashboard
+);

@@ -1,3 +1,5 @@
+const jwt = require("jsonwebtoken"); // <-- Add this line
+
 module.exports = async (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) return res.status(401).json({ error: "Unauthorized" });
@@ -12,6 +14,7 @@ module.exports = async (req, res, next) => {
     };
     next();
   } catch (err) {
+    console.error("JWT Error:", err.message); // Log the error details
     res.status(401).json({ error: "Invalid token" });
   }
 };

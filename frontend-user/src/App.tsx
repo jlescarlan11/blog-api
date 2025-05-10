@@ -1,7 +1,6 @@
 // src/App.tsx
 import React, { useEffect } from "react";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
-
 import Signup from "./pages/SignUp";
 import LogIn from "./pages/LogIn";
 import Dashboard from "./pages/Dashboard";
@@ -14,14 +13,19 @@ interface RouteProps {
 }
 
 const ProtectedRoute: React.FC<RouteProps> = ({ children }) =>
-  isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
+  isAuthenticated() ? (
+    <>{children}</>
+  ) : (
+    <>
+      <Dashboard />
+    </>
+  );
 
 const PublicRoute: React.FC<RouteProps> = ({ children }) =>
-  isAuthenticated() ? <Navigate to="/dashboard" replace /> : <>{children}</>;
+  isAuthenticated() ? <Navigate to="/" /> : <>{children}</>;
 
 const Layout: React.FC = () => {
   const location = useLocation();
-  const hideNavbar = ["/login", "/signup"].includes(location.pathname);
 
   useEffect(() => {
     const saved = localStorage.getItem("theme") || "light";
@@ -30,11 +34,9 @@ const Layout: React.FC = () => {
 
   return (
     <>
-      {!hideNavbar && (
-        <Navbar>
-          <ThemeSwitcher />
-        </Navbar>
-      )}
+      <Navbar>
+        <ThemeSwitcher />
+      </Navbar>
       <Outlet />
     </>
   );
@@ -42,17 +44,15 @@ const Layout: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <>
+    <div className="container mx-auto max-w-7xl">
       <Routes>
         <Route element={<Layout />}>
           <Route
             path="/"
             element={
-              isAuthenticated() ? (
-                <Navigate to="/dashboard" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
             }
           />
           <Route
@@ -71,17 +71,9 @@ const App: React.FC = () => {
               </PublicRoute>
             }
           />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
         </Route>
       </Routes>
-    </>
+    </div>
   );
 };
 
