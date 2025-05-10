@@ -3,6 +3,7 @@ import axios from "axios";
 import { login } from "../auth";
 import { useNavigate } from "react-router-dom";
 import { LuKeyRound, LuMail, LuNewspaper, LuUser } from "react-icons/lu";
+import { useSearchParams } from "react-router-dom";
 
 interface FormData {
   firstName: string;
@@ -10,16 +11,22 @@ interface FormData {
   email: string;
   password: string;
   confirmPassword: string;
+  inviteCode: string; // ← new
 }
 
 const Signup: React.FC = () => {
+  const [search] = useSearchParams();
+  const inviteCode = search.get("invite") || "";
+
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
+    inviteCode: inviteCode,
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -182,6 +189,8 @@ const Signup: React.FC = () => {
               required
             />
           </label>
+
+          <input type="hidden" name="inviteCode" value={formData.inviteCode} />
 
           <button
             type="submit"
