@@ -1,11 +1,19 @@
 // src/auth.ts
+import { jwtDecode } from "jwt-decode";
 
-/**
- * Checks if a JWT token exists in localStorage.
- * @returns true if a token is present, false otherwise.
- */
-export const isAuthenticated = (): boolean => {
+export const isAuthenticated = () => {
   return !!localStorage.getItem("token");
+};
+
+export const getCurrentUser = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    return jwtDecode<{ id: string; email: string; role: string }>(token);
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
 };
 
 /**

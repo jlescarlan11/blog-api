@@ -85,6 +85,42 @@ const controller = {
       res.status(500).json({ error: "Server error" });
     }
   },
+  adminLogin: async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+      const user = await query.user.getByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Additional admin role check
+      if (user.role !== "ADMIN") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const valid = await bcrypt.compare(password, user.password);
+      if (!valid) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      const token = generateToken(user);
+      res.status(200).json({
+        message: "Admin login successful",
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+        },
+        token,
+      });
+    } catch (err) {
+      console.error("Admin login error:", err);
+      res.status(500).json({ error: "Server error during admin login" });
+    }
+  },
 
   dashboard: (req, res) => {
     try {
@@ -92,7 +128,7 @@ const controller = {
       if (!user) {
         return res.status(401).json({ error: "Unauthorized" });
       }
-      res.json({ message: `Welcome, ${user.firstName}` });
+      res.json({ user });
     } catch (err) {
       console.error("Dashboard error:", err);
       res.status(500).json({ error: "Server error" });
