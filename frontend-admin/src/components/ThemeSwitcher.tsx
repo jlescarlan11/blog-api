@@ -1,46 +1,43 @@
-// ThemeSwitcher.tsx (React + TypeScript)
 import { useEffect, useState } from "react";
+import { LuSun } from "react-icons/lu";
 
 const ThemeSwitcher: React.FC = () => {
-  // load saved theme or fallback to light
   const [theme, setTheme] = useState<string>(
-    () => localStorage.getItem("theme") || "light"
+    () => localStorage.getItem("theme") || "lofi"
   );
 
-  // whenever `theme` changes, apply it and persist
+  const toggleTheme = () => {
+    const newTheme = theme === "lofi" ? "black" : "lofi";
+    setTheme(newTheme);
+  };
+
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // you could pull the list of themes from a constant or fetch from DaisyUI docs
-  const themes = [
-    "light",
-    "dark",
-    "cupcake",
-    "bumblebee",
-    "emerald",
-    "corporate",
-    "synthwave",
-    "retro",
-    "cyberpunk",
-    "valentine",
-    "halloween",
-    // … the rest of the 35+ names …
-  ];
-
   return (
-    <select
-      value={theme}
-      onChange={(e) => setTheme(e.target.value)}
-      className="select select-bordered"
-    >
-      {themes.map((t) => (
-        <option key={t} value={t}>
-          {t.charAt(0).toUpperCase() + t.slice(1)}
-        </option>
-      ))}
-    </select>
+    <label className="swap swap-rotate rounded-full size-8 ">
+      {/* This hidden checkbox controls the state */}
+      <input
+        type="checkbox"
+        checked={theme === "black"}
+        onChange={toggleTheme}
+        className="swap-input"
+      />
+
+      {/* Sun icon (light theme) */}
+      <LuSun className="swap-on rounded-full fill-current size-4" />
+
+      {/* Moon icon (dark theme) */}
+      <svg
+        className="swap-off rounded-full text-4 fill-current"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+      </svg>
+    </label>
   );
 };
 

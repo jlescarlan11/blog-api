@@ -18,3 +18,5 @@ router.get(
   authorize("ADMIN"),
   controller.dashboard
 );
+
+module.exports = router;

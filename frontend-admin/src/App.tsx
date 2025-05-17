@@ -1,75 +1,58 @@
 // src/App.tsx
-import React, { useEffect } from "react";
-import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import React from "react";
+import { Route, Routes } from "react-router-dom";
 
-import LogIn from "./pages/LogIn";
-import Dashboard from "./pages/Dashboard";
-import Navbar from "./components/Navbar";
-import ThemeSwitcher from "./components/ThemeSwitcher";
 import { isAuthenticated } from "./auth";
+import Dashboard from "./pages/Dashboard";
+import Layout from "./components/Layout";
+import Posts from "./pages/Posts";
 
 interface RouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<RouteProps> = ({ children }) =>
-  isAuthenticated() ? <>{children}</> : <Navigate to="/login" />;
-
-const PublicRoute: React.FC<RouteProps> = ({ children }) =>
-  isAuthenticated() ? <Navigate to="/" /> : <>{children}</>;
-
-const Layout: React.FC = () => {
-  const location = useLocation();
-  const hideNavbar = ["/login", "/signup"].includes(location.pathname);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("theme") || "light";
-    document.documentElement.setAttribute("data-theme", saved);
-  }, [location.pathname]);
-
-  return (
+  isAuthenticated() ? (
+    <>{children}</>
+  ) : (
     <>
-      {!hideNavbar && (
-        <Navbar>
-          <ThemeSwitcher />
-        </Navbar>
-      )}
-      <Outlet />
+      <Dashboard />
     </>
   );
-};
 
 const App: React.FC = () => {
   return (
-    <>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route
-            path="/"
-            element={
-              isAuthenticated() ? <Navigate to="/" /> : <Navigate to="/login" />
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <LogIn />
-              </PublicRoute>
-            }
-          />
-
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Route>
-      </Routes>
-    </>
+    <Routes>
+      {/* Use the updated Layout component */}
+      <Route element={<Layout />}>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        {/* Removed the direct /login and /signup routes */}
+        {/* <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LogIn />
+            </PublicRoute>
+          }
+        /> */}
+        <Route path="/posts" element={<Posts />} />
+        {/* <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <Signup />
+            </PublicRoute>
+          }
+        /> */}
+      </Route>
+    </Routes>
   );
 };
 
