@@ -9,7 +9,12 @@ export const getCurrentUser = () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
   try {
-    return jwtDecode<{ id: string; email: string; role: string }>(token);
+    return jwtDecode<{
+      id: string;
+      email: string;
+      role: string;
+      firstName: string;
+    }>(token);
   } catch (error) {
     console.error("Error decoding token:", error);
     return null;

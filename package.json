@@ -4,7 +4,9 @@
   "description": "A RESTful blog API backend with separate read/write frontends: public reader and author interfaces.",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon backend/app.js",
+    "backend": "nodemon backend/app.js",
+    "user": "npm --prefix frontend-user run dev",
+    "admin": "npm --prefix frontend-admin run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

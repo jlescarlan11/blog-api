@@ -5,7 +5,12 @@ const query = require("../utils/query");
 // Helper to sign a JWT
 function generateToken(user) {
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      firstName: user.firstName,
+    },
     process.env.JWT_SECRET,
     {
       expiresIn: "2d",
