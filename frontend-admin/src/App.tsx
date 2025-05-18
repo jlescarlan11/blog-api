@@ -1,58 +1,59 @@
-// src/App.tsx
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-
-import { isAuthenticated } from "./auth";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
 import Posts from "./pages/Posts";
+import Settings from "./pages/Settings";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 interface RouteProps {
   children: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<RouteProps> = ({ children }) =>
-  isAuthenticated() ? (
+const ProtectedRoute: React.FC<RouteProps> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+
+  return isAuthenticated ? (
     <>{children}</>
   ) : (
     <>
-      <Dashboard />
+      <h1>You Must Log In First</h1>
     </>
   );
+};
 
 const App: React.FC = () => {
   return (
-    <Routes>
-      {/* Use the updated Layout component */}
-      <Route element={<Layout />}>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        {/* Removed the direct /login and /signup routes */}
-        {/* <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <LogIn />
-            </PublicRoute>
-          }
-        /> */}
-        <Route path="/posts" element={<Posts />} />
-        {/* <Route
-          path="/signup"
-          element={
-            <PublicRoute>
-              <Signup />
-            </PublicRoute>
-          }
-        /> */}
-      </Route>
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/posts"
+            element={
+              <ProtectedRoute>
+                <Posts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+      </Routes>
+    </AuthProvider>
   );
 };
 
