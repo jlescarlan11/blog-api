@@ -22,5 +22,19 @@ module.exports = {
     getById: async (id) => {
       return await prisma.user.findUnique({ where: { id } });
     },
+    // New Prisma query to update user's first and last name
+    updateName: async (id, firstName, lastName) => {
+      return await prisma.user.update({
+        where: { id },
+        data: { firstName, lastName },
+      });
+    },
+    // New Prisma query to update user's password
+    updatePassword: async (id, password) => {
+      return await prisma.user.update({
+        where: { id },
+        data: { password },
+      });
+    },
   },
 };

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { login } from "../auth"; // Assuming this exists and handles token storage
 import { useNavigate } from "react-router-dom"; // Removed Link import
 import { LuKeyRound, LuMail } from "react-icons/lu";
+import { useAuth } from "../context/AuthContext";
 
 interface FormData {
   email: string;
@@ -23,6 +23,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDialogElement>(null); // Ref for the modal element
+  const { login } = useAuth();
 
   // Effect to show/hide the modal using the dialog element's methods
   useEffect(() => {
