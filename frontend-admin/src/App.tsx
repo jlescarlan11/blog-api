@@ -8,6 +8,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import NewPostPage from "./pages/NewPost";
 import Post from "./pages/Post";
 
+import EditPostPage from "./pages/EditPost";
+
 interface RouteProps {
   children: React.ReactNode;
 }
@@ -67,6 +69,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Post />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/posts/:postId/edit"
+            element={
+              <ProtectedRoute>
+                <EditPostPage />
               </ProtectedRoute>
             }
           />
