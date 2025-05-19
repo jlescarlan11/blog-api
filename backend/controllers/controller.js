@@ -273,11 +273,12 @@ const controller = {
     }
 
     try {
-      // const { users, totalUsers } = await query.user.getUsers(search, pageNum, limitNum); // Uncomment and implement in query.js
+      // Assuming query.user has a getPaginated function similar to the blog posts one
+      // const { users, totalUsers } = await query.user.getPaginated(search, pageNum, limitNum); // Uncomment and implement in query.js
       const users = []; // Placeholder
       const totalUsers = 0; // Placeholder
 
-      const result = { users, totalUsers };
+      const result = { users, totalUsers, page: pageNum, limit: limitNum };
       // Cache the users list
       cache.set(cacheKey, result);
 
@@ -291,28 +292,95 @@ const controller = {
     }
   },
 
-  // Placeholder for blog post controllers - Add caching and invalidation as needed
   createBlogPost: async (req, res) => {
-    // ... logic to create blog post ...
-    // Invalidate blog post related caches after creation
-    cache.invalidateAllBlogCaches();
-    res.status(201).json({ message: "Blog post creation logic here." }); // Replace
+    const { content, title, published } = req.body;
+    const authorId = req.user.id;
+
+    try {
+      const isPublished = published === "true"; // Convert to boolean
+
+      const newPost = await query.post.create(
+        title,
+        content,
+        isPublished,
+        authorId
+      );
+
+      cache.invalidateAllBlogCaches();
+
+      res.status(201).json({
+        post: {
+          id: newPost.id,
+          title: newPost.title,
+          content: newPost.content,
+          published: newPost.published,
+          authorId: newPost.authorId,
+        },
+        message: "Blog post created successfully.",
+      });
+    } catch (err) {
+      console.error("Create posts error: ", err);
+      res.status(500).json({ error: "Failed to create blog post." });
+    }
   },
 
+  // --- MODIFIED getBlogPosts FUNCTION ---
   getBlogPosts: async (req, res) => {
-    const { filter, sort, page, limit } = req.query;
-    const cacheKey = CACHE_KEYS.BLOG_POSTS_LIST(filter, sort, page, limit);
+    // Extract pagination, filtering, and sorting parameters
+    const { filter, sort, page, limit, search } = req.query; // Added search
+    const pageNum = parseInt(page) || 1; // Default to page 1
+    const limitNum = parseInt(limit) || 10; // Default to 10 items per page
+    const skip = (pageNum - 1) * limitNum; // Calculate how many records to skip
+
+    // Generate cache key based on ALL relevant parameters (including pagination)
+    const cacheKey = CACHE_KEYS.BLOG_POSTS_LIST(
+      search, // Include search in key
+      filter,
+      sort,
+      pageNum, // Use parsed page number
+      limitNum // Use parsed limit number
+    );
     const cachedPosts = cache.get(cacheKey);
-    if (cachedPosts) return res.status(200).json(cachedPosts);
 
-    // ... logic to fetch blog posts ...
-    const posts = []; // Placeholder
-    const totalPosts = 0; // Placeholder
-    const result = { posts, totalPosts };
+    if (cachedPosts) {
+      console.log(`Serving blog posts from cache for key: ${cacheKey}`);
+      return res.status(200).json(cachedPosts);
+    }
 
-    cache.set(cacheKey, result);
-    res.status(200).json(result); // Replace
+    try {
+      // --- Call the query function with pagination parameters ---
+      // ASSUMPTION: query.post.getPaginated exists and takes skip, take, search, filter, sort
+      // It should return an object like { posts: [...], totalPosts: number }
+      const { posts, totalPosts } = await query.post.getPaginated(
+        skip,
+        limitNum,
+        search, // Pass search down to query layer
+        filter, // Pass filter down to query layer
+        sort // Pass sort down to query layer
+      );
+
+      console.log("sort:", sort);
+
+      // Structure the result with pagination metadata
+      const result = {
+        posts,
+        totalPosts,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(totalPosts / limitNum),
+      };
+
+      // Cache the fetched result
+      cache.set(cacheKey, result);
+      console.log(`Workspaceed and cached blog posts for key: ${cacheKey}`);
+
+      res.status(200).json(result);
+    } catch (err) {
+      console.error("Error fetching blog posts:", err);
+      res.status(500).json({ error: "Server error fetching blog posts." });
+    }
   },
+  // --- END OF MODIFIED getBlogPosts FUNCTION ---
 
   getBlogPostById: async (req, res) => {
     const { postId } = req.params;
@@ -320,33 +388,135 @@ const controller = {
     const cachedPost = cache.get(cacheKey);
     if (cachedPost) return res.status(200).json(cachedPost);
 
-    // ... logic to fetch single blog post ...
-    const post = { id: postId, title: "Example Post", content: "..." }; // Placeholder
+    console.log("here");
 
-    cache.set(cacheKey, post);
-    res.status(200).json(post); // Replace
+    try {
+      // Assumes query.post.getById exists
+      const post = await query.post.getById(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Blog post not found." });
+      }
+
+      cache.set(cacheKey, post);
+      res.status(200).json(post);
+    } catch (err) {
+      console.error("Error fetching blog post by ID:", err);
+      res
+        .status(500)
+        .json({ error: "Server error fetching blog post details." });
+    }
   },
 
   updateBlogPost: async (req, res) => {
     const { postId } = req.params;
-    // ... logic to update blog post ...
-    // Invalidate blog post related caches after update
-    cache.invalidateAllBlogCaches();
-    // Also invalidate the specific post detail cache
-    cache.del(CACHE_KEYS.BLOG_POST_DETAIL(postId));
-    res.status(200).json({ message: `Blog post ${postId} update logic here.` }); // Replace
-  },
+    const { title, content, published } = req.body;
 
+    try {
+      // Assumes query.post.update exists
+      const updatedPost = await query.post.update(postId, {
+        title,
+        content,
+        published: published !== undefined ? published === "true" : undefined, // Convert to boolean if provided
+      });
+
+      if (!updatedPost) {
+        return res.status(404).json({ message: "Blog post not found." });
+      }
+
+      // Invalidate blog post related caches after update
+      cache.invalidateAllBlogCaches();
+      // Also invalidate the specific post detail cache
+      cache.del(CACHE_KEYS.BLOG_POST_DETAIL(postId));
+      console.log(`Invalidated caches for blog post ${postId}`);
+
+      res.status(200).json({
+        message: `Blog post ${postId} updated successfully.`,
+        post: updatedPost,
+      });
+    } catch (err) {
+      console.error("Error updating blog post:", err);
+      res.status(500).json({ error: "Server error during blog post update." });
+    }
+  },
+  updateBlogPostStatus: async (req, res) => {
+    const { postId } = req.params;
+    const { published } = req.body;
+
+    console.log(postId);
+    try {
+      console.log("is", published);
+      // Assumes query.post.update exists
+      const updatedPost = await query.post.update(postId, {
+        published: published,
+      });
+
+      if (!updatedPost) {
+        return res.status(404).json({ message: "Blog post not found." });
+      }
+
+      // Invalidate blog post related caches after update
+      cache.invalidateAllBlogCaches();
+      // Also invalidate the specific post detail cache
+      cache.del(CACHE_KEYS.BLOG_POST_DETAIL(postId));
+      console.log(`Invalidated caches for blog post ${postId}`);
+
+      console.log(updatedPost);
+      console.log("here");
+      res.status(200).json({
+        message: `Blog post ${postId} updated successfully.`,
+        post: updatedPost,
+      });
+    } catch (err) {
+      console.error("Error updating blog post:", err);
+      res.status(500).json({ error: "Server error during blog post update." });
+    }
+  },
   deleteBlogPost: async (req, res) => {
     const { postId } = req.params;
-    // ... logic to delete blog post ...
-    // Invalidate blog post related caches after deletion
-    cache.invalidateAllBlogCaches();
-    // Also invalidate the specific post detail cache
-    cache.del(CACHE_KEYS.BLOG_POST_DETAIL(postId));
-    res
-      .status(200)
-      .json({ message: `Blog post ${postId} deletion logic here.` }); // Replace
+
+    try {
+      // Assumes query.post.delete exists
+      const deletedPost = await query.post.delete(postId);
+
+      if (!deletedPost) {
+        return res.status(404).json({ message: "Blog post not found." });
+      }
+
+      // Invalidate blog post related caches after deletion
+      cache.invalidateAllBlogCaches();
+      // Also invalidate the specific post detail cache
+      cache.del(CACHE_KEYS.BLOG_POST_DETAIL(postId));
+      console.log(`Invalidated caches for deleted blog post ${postId}`);
+
+      res
+        .status(200)
+        .json({ message: `Blog post ${postId} deleted successfully.` });
+    } catch (err) {
+      console.error("Error deleting blog post:", err);
+      res
+        .status(500)
+        .json({ error: "Server error during blog post deletion." });
+    }
+  },
+  deleteAllBlogPosts: async (req, res) => {
+    try {
+      const deletedPosts = await query.post.deleteAll();
+
+      if (!deletedPosts) {
+        return res.status(404).json({ message: "Blog posts not found." });
+      }
+
+      // Invalidate blog post related caches after deletion
+      cache.invalidateAllBlogCaches();
+      console.log(`Invalidated caches for deleted blog posts`);
+
+      res.status(200).json({ message: `Blog posts deleted successfully.` });
+    } catch (err) {
+      console.error("Error deleting blog posts:", err);
+      res
+        .status(500)
+        .json({ error: "Server error during blog posts deletion." });
+    }
   },
 };
 

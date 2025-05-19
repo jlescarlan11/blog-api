@@ -241,7 +241,7 @@ const Settings = () => {
             Back to Home
           </button>
 
-          <h1 className="text-3xl font-bold mb-2">Account Settings</h1>
+          <h1 className=" text-3xl font-bold mb-2">Account Settings</h1>
           <p className="text-base-content/60">
             Manage your account preferences and security
           </p>
@@ -259,7 +259,7 @@ const Settings = () => {
               </h2>
 
               <div className="flex flex-col md:flex-row md:items-center gap-6 py-2">
-                <div className="avatar">
+                <div className="avatar avatar-placeholder">
                   <div className="bg-primary text-primary-content rounded-full w-16 h-16 flex items-center justify-center">
                     {initial ? (
                       <span className="text-xl font-medium">{initial}</span>

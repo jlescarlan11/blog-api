@@ -21,7 +21,7 @@ const Navbar: React.FC<NavbarProps> = ({ children }) => {
       <div className="container max-w-7xl mx-auto flex items-center justify-between ">
         <div className="text-xl flex items-center gap-4">
           <LuNewspaper className="" />
-          <h1 className="font-bold">Sutta's Blog</h1>
+          <h1 className=" font-bold">Sutta's Blog</h1>
         </div>
 
         <div className="flex items-center space-x-4">
