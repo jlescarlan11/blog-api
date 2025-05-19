@@ -1,46 +1,34 @@
-// ThemeSwitcher.tsx (React + TypeScript)
+// themeswitcher.tsx
 import { useEffect, useState } from "react";
 
 const ThemeSwitcher: React.FC = () => {
-  // load saved theme or fallback to light
+  // Initialize theme from localStorage or default to 'lofi'
   const [theme, setTheme] = useState<string>(
-    () => localStorage.getItem("theme") || "light"
+    () => localStorage.getItem("theme") || "lofi"
   );
 
-  // whenever `theme` changes, apply it and persist
+  // Function to handle checkbox change
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // If the checkbox is checked, set theme to 'black', otherwise set to 'lofi'
+    const newTheme = event.target.checked ? "black" : "lofi";
+    setTheme(newTheme);
+  };
+
+  // Effect to update the data-theme attribute and localStorage
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // you could pull the list of themes from a constant or fetch from DaisyUI docs
-  const themes = [
-    "light",
-    "dark",
-    "cupcake",
-    "bumblebee",
-    "emerald",
-    "corporate",
-    "synthwave",
-    "retro",
-    "cyberpunk",
-    "valentine",
-    "halloween",
-    // … the rest of the 35+ names …
-  ];
-
   return (
-    <select
-      value={theme}
-      onChange={(e) => setTheme(e.target.value)}
-      className="select select-bordered"
-    >
-      {themes.map((t) => (
-        <option key={t} value={t}>
-          {t.charAt(0).toUpperCase() + t.slice(1)}
-        </option>
-      ))}
-    </select>
+    <input
+      type="checkbox"
+      id="theme-toggle"
+      checked={theme === "black"}
+      onChange={handleCheckboxChange}
+      className="checkbox theme-controller"
+      aria-label="Toggle dark mode"
+    />
   );
 };
 

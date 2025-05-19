@@ -5,6 +5,10 @@ import Layout from "./components/Layout";
 import Posts from "./pages/Posts";
 import Settings from "./pages/Settings";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import NewPostPage from "./pages/NewPost";
+import Post from "./pages/Post";
+
+import EditPostPage from "./pages/EditPost";
 
 interface RouteProps {
   children: React.ReactNode;
@@ -17,7 +21,7 @@ const ProtectedRoute: React.FC<RouteProps> = ({ children }) => {
     <>{children}</>
   ) : (
     <>
-      <h1>You Must Log In First</h1>
+      <h1 className="">You Must Log In First</h1>
     </>
   );
 };
@@ -48,6 +52,31 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/posts/new"
+            element={
+              <ProtectedRoute>
+                <NewPostPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/posts/:postId"
+            element={
+              <ProtectedRoute>
+                <Post />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/posts/:postId/edit"
+            element={
+              <ProtectedRoute>
+                <EditPostPage />
               </ProtectedRoute>
             }
           />

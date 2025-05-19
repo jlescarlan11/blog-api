@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -20,36 +14,70 @@ enum Role {
 }
 
 model User {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   firstName String
   lastName  String
-  email     String    @unique
+  email     String   @unique
   password  String
-  role      Role      @default(USER) // Default to normal user
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  posts     Post[] // Relationship to posts they've authored
-  comments  Comment[] // Relationship to their comments
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  posts        Post[] // cascades via Post.author below
+  comments     Comment[] // cascades via Comment.user below
+  UserLikePost UserLikePost[] // cascades via UserLikePost.user below
 }
 
 model Post {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   title     String
   content   String
-  published Boolean   @default(false) // Unpublished by default
-  author    User      @relation(fields: [authorId], references: [id])
-  authorId  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  comments  Comment[]
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // author → if User is deleted, delete their posts
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+
+  // comments → cascades via Comment.post below
+  comments Comment[]
+
+  // analytics
+  tags  String[] @default([])
+  views Int      @default(0)
+  likes Int      @default(0)
+
+  // likes → cascades via UserLikePost.post below
+  UserLikePost UserLikePost[]
 }
 
 model Comment {
   id        String   @id @default(uuid())
   content   String
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    String
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
   createdAt DateTime @default(now())
+
+  // post → if Post is deleted, delete these comments
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  // user → if User is deleted, delete their comments
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+}
+
+model UserLikePost {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  // user → if User is deleted, delete like records
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  // post → if Post is deleted, delete like records
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  @@unique([userId, postId])
 }

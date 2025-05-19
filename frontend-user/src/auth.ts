@@ -1,24 +1,35 @@
 // src/auth.ts
+import { jwtDecode } from "jwt-decode";
 
-/**
- * Checks if a JWT token exists in localStorage.
- * @returns true if a token is present, false otherwise.
- */
-export const isAuthenticated = (): boolean => {
-  return !!localStorage.getItem("token");
+// This file now contains pure utility functions that don't manage state
+// Keep these as they're useful for token decoding and storage management
+
+export const getToken = (): string | null => {
+  return localStorage.getItem("token");
 };
 
-/**
- * Stores the JWT token in localStorage.
- * @param token - The JWT token string.
- */
-export const login = (token: string): void => {
+export const getCurrentUser = () => {
+  const token = getToken();
+  if (!token) return null;
+
+  try {
+    return jwtDecode<{
+      id: string;
+      email: string;
+      role: string;
+      firstName: string;
+      lastName: string;
+    }>(token);
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+};
+
+export const storeToken = (token: string): void => {
   localStorage.setItem("token", token);
 };
 
-/**
- * Removes the JWT token from localStorage.
- */
-export const logout = (): void => {
+export const removeToken = (): void => {
   localStorage.removeItem("token");
 };

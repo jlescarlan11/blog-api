@@ -23,10 +23,18 @@ const CACHE_KEYS = {
   ADMIN_USERS_LIST: (search = "all", page = 1, limit = 10) =>
     `admin_users_list:${search}:${page}:${limit}`,
 
+  // --- NEW CACHE KEY FOR ALL BLOG POSTS ---
+  ALL_BLOG_POSTS: () => "all_blog_posts",
+
   // Blog post list keys (examples - adjust based on your blog's filtering/sorting)
+  // The BLOG_POSTS_LIST key is now less relevant if frontend handles filtering/sorting/pagination
+  // but kept for potential other uses or if the backend still provides paginated lists elsewhere.
   BLOG_POSTS_LIST: (filter = "all", sort = "date", page = 1, limit = 10) =>
     `blog_posts_list:${filter}:${sort}:${page}:${limit}`,
   BLOG_POST_DETAIL: (postId) => `blog_post_detail:${postId}`,
+
+  // --- NEW CACHE KEY FOR COMMENTS ---
+  POST_COMMENTS: (postId) => `post_comments:${postId}`,
 
   // Add other cache keys only if new data types/endpoints are added to the controller
   // e.g., COMMENTS_LIST: (postId) => `comments_list:${postId}`,
@@ -109,18 +117,36 @@ const invalidateAllUserCaches = () => {
  * Invalidate all blog post related caches.
  * Called when blog posts are created, updated, or deleted.
  * Also invalidates dashboard data if it includes post counts/stats.
+ * NOTE: With frontend filtering/sorting, the primary cache to invalidate
+ * is the 'ALL_BLOG_POSTS' cache.
+ * Also invalidates comments cache for the specific post if provided.
+ * @param {string} [postId] - Optional post ID to invalidate specific comment cache.
  */
-const invalidateAllBlogCaches = () => {
-  const blogKeys = myCache
-    .keys()
-    .filter(
-      (key) =>
-        key.startsWith("blog_posts_list:") ||
-        key.startsWith("blog_post_detail:")
-    );
-  if (blogKeys.length > 0) {
-    delMany(blogKeys);
+/**
+ * Invalidate all blog post related caches.
+ * Called when blog posts are created, updated, or deleted.
+ * Also invalidates dashboard data if it includes post counts/stats.
+ * NOTE: With frontend filtering/sorting, the primary cache to invalidate
+ * is the 'ALL_BLOG_POSTS' cache.
+ * Also invalidates comments cache for the specific post if provided.
+ * @param {string} [postId] - Optional post ID to invalidate specific comment cache.
+ */
+const invalidateAllBlogCaches = (postId) => {
+  // Invalidate the main cache for all posts
+  del(CACHE_KEYS.ALL_BLOG_POSTS());
+
+  // Invalidate individual post detail caches (optional, but good practice)
+  // This might require a more complex approach if you have many post detail caches
+  // or if you don't want to fetch all post IDs just to invalidate.
+  // For simplicity, we'll just invalidate the main 'all posts' cache and rely
+  // on fetching fresh data for individual posts when needed.
+  // If a specific post is updated/deleted, invalidating its detail cache is good.
+  if (postId) {
+    del(CACHE_KEYS.BLOG_POST_DETAIL(postId));
+    // Also invalidate comments cache for this specific post
+    del(CACHE_KEYS.POST_COMMENTS(postId));
   }
+
   // Invalidate dashboard data if it includes post counts/stats
   const dashboardKeys = myCache
     .keys()

@@ -2,3 +2,13 @@
 @plugin "daisyui" {
   themes: lofi, black;
 }
+
+* {
+  font-family: "open sans";
+}
+
+h1,
+h2,
+h3 {
+  font-family: "lora";
+}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { login } from "../auth";
+// import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
 import { LuKeyRound, LuMail, LuUser } from "react-icons/lu";
 import { useSearchParams } from "react-router-dom";
@@ -55,8 +55,8 @@ const Signup: React.FC = () => {
         throw new Error("Missing SIGNUP_URL");
       }
 
-      const res = await axios.post(signupUrl, formData);
-      login(res.data.token);
+      // const res = await axios.post(signupUrl, formData);
+      // login(res.data.token);
       navigate("/");
     } catch (err) {
       console.error(err);
