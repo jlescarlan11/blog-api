@@ -1,0 +1,57 @@
+{
+  "name": "blog-api",
+  "version": "1.0.0",
+  "description": "A RESTful blog API backend with separate read/write frontends: public reader and author interfaces.",
+  "main": "app.js",
+  "scripts": {
+    "backend": "nodemon backend/app.js",
+    "user": "npm --prefix frontend-user run dev",
+    "admin": "npm --prefix frontend-admin run dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jlescarlan11/blog-api.git"
+  },
+  "keywords": [
+    "blog",
+    "api",
+    "restful",
+    "backend",
+    "read",
+    "author",
+    "post",
+    "comments",
+    "john",
+    "lester",
+    "escarlan"
+  ],
+  "author": "John Lester Escarlan <jlescarlan11@gmail.com> (https://john-lester-escarlan-portfolio.vercel.app/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jlescarlan11/blog-api/issues"
+  },
+  "homepage": "https://github.com/jlescarlan11/blog-api#readme",
+  "dependencies": {
+    "@prisma/client": "^6.7.0",
+    "@tinymce/tinymce-react": "^6.1.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dompurify": "^3.2.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "framer-motion": "^12.12.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
+    "morgan": "^1.10.0",
+    "node-cache": "^5.1.2",
+    "passport-jwt": "^4.0.1",
+    "prisma": "^6.7.0",
+    "react-toastify": "^11.0.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
